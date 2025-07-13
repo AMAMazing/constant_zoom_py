@@ -30,7 +30,7 @@ setup(
         "Operating System :: OS Independent",
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
-        "Topic :: Multimedia :: Video :: Editing",
+        "Topic :: Multimedia :: Video", 
     ],
     python_requires=">=3.6",
 )

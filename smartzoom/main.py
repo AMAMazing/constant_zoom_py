@@ -60,16 +60,18 @@ def _draw_debug_results(image: np.ndarray, box_coords: tuple, zoom_val: float, c
 
 def _render_video_with_zoom(input_path: str, output_path: str, zoom_value: float):
     """Internal helper to render the video with a calculated final zoom level."""
-    # ... (This function remains unchanged from the previous version) ...
     print(f"\\n--- Starting Video Render Process ---")
     print(f"Applying zoom to finish at {zoom_value:.2f}x")
+    
     output_dir = os.path.dirname(output_path)
     temp_video_file = os.path.join(output_dir, f"temp_{os.path.basename(output_path)}")
+
     cap = cv2.VideoCapture(input_path)
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)); height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = cap.get(cv2.CAP_PROP_FPS); total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     out = cv2.VideoWriter(temp_video_file, fourcc, fps, (width, height))
+    
     for current_frame in range(total_frames):
         ret, frame = cap.read()
         if not ret: break
@@ -81,16 +83,21 @@ def _render_video_with_zoom(input_path: str, output_path: str, zoom_value: float
         zoomed_frame = cv2.resize(cropped_frame, (width, height), interpolation=cv2.INTER_LANCZOS4)
         out.write(zoomed_frame)
         if current_frame > 0 and current_frame % 150 == 0: print(f"  Rendered {current_frame} / {total_frames} frames...")
+    
     cap.release(); out.release()
     print("Video frame rendering complete.")
+    
     print("\\n--- Merging video with original audio using FFmpeg ---")
     command = ['ffmpeg', '-y', '-i', temp_video_file, '-i', input_path, '-c:v', 'copy', '-c:a', 'copy', '-map', '0:v:0', '-map', '1:a:0?', output_path]
+    
     try:
         subprocess.run(command, check=True, capture_output=True)
         print(f"Successfully created final video: {output_path}")
     except subprocess.CalledProcessError as e: print(f"Error during FFmpeg processing:\\n{e.stderr.decode()}")
     except FileNotFoundError: print("Error: FFmpeg not found. Please ensure it's in your system's PATH.")
-    os.remove(temp_video_file)
+    finally:
+        if os.path.exists(temp_video_file):
+            os.remove(temp_video_file)
 
 # ==============================================================================
 # --- Public Function ---
@@ -111,7 +118,7 @@ def smartzoom(input_path: str, output_path: str, margin: int = 50, debug: bool =
     if not os.path.exists(input_path): print(f"Error: Input file not found at '{input_path}'"); return
 
     output_dir = os.path.dirname(output_path)
-    if not os.path.exists(output_dir):
+    if output_dir and not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
     cap = cv2.VideoCapture(input_path)
@@ -130,15 +137,17 @@ def smartzoom(input_path: str, output_path: str, margin: int = 50, debug: bool =
         if raw_viewport:
             image_raw = first_frame.copy()
             _draw_debug_results(image_raw, raw_viewport, raw_zoom, color=(0, 0, 255), label="Raw")
-            cv2.imwrite(os.path.join(output_dir, 'debug_raw_viewport.png'), image_raw)
-            print(f"Saved raw debug image to '{output_dir}'")
+            debug_path = os.path.join(output_dir, 'debug_raw_viewport.png')
+            cv2.imwrite(debug_path, image_raw)
+            print(f"Saved raw debug image to '{debug_path}'")
 
         # Margin box visualization
         if final_viewport:
             image_margin = first_frame.copy()
             _draw_debug_results(image_margin, final_viewport, final_zoom_value, color=(0, 255, 0), label="Margin")
-            cv2.imwrite(os.path.join(output_dir, 'debug_margin_viewport.png'), image_margin)
-            print(f"Saved margin debug image to '{output_dir}'")
+            debug_path = os.path.join(output_dir, 'debug_margin_viewport.png')
+            cv2.imwrite(debug_path, image_margin)
+            print(f"Saved margin debug image to '{debug_path}'")
         
     if final_zoom_value <= 1.01:
         print("\\nContent (with margin) is larger than the video frame. No zoom will be applied.")
@@ -148,46 +157,13 @@ def smartzoom(input_path: str, output_path: str, margin: int = 50, debug: bool =
     _render_video_with_zoom(input_path, output_path, final_zoom_value)
 
 # ==============================================================================
-# --- CLI Handler ---
-# ==============================================================================
-
-def cli():
-    """Command-line interface for the smartzoom tool."""
-    parser = argparse.ArgumentParser(
-        description="Automatically apply a smooth, continuous zoom to a video, perfectly framing its content."
-    )
-    parser.add_argument(
-        "input_path",
-        type=str,
-        help="Path to the source video file."
-    )
-    parser.add_argument(
-        "output_path",
-        type=str,
-        help="Path where the final video will be saved."
-    )
-    parser.add_argument(
-        "--margin",
-        type=int,
-        default=50,
-        help="The pixel distance to keep from the content on all sides. Defaults to 50."
-    )
-    parser.add_argument(
-        "--debug",
-        action="store_true",
-        help="If set, saves detection images to the output folder."
-    )
-    args = parser.parse_args()
-
-    smartzoom(
-        input_path=args.input_path,
-        output_path=args.output_path,
-        margin=args.margin,
-        debug=args.debug
-    )
-
-# ==============================================================================
 # --- Main Execution Block ---
 # ==============================================================================
 if __name__ == "__main__":
-    cli()
+    parser = argparse.ArgumentParser(description='Apply a smart, continuous zoom to a video.')
+    parser.add_argument('input_path', type=str, help='Path to the source video file.')
+    parser.add_argument('output_path', type=str, help='Path where the final video will be saved.')
+    parser.add_argument('--margin', type=int, default=50, help='Margin in pixels around the content. Defaults to 50.')
+    parser.add_argument('--debug', action='store_true', help='Enable debug mode to save visualization images.')
+    args = parser.parse_args()
+    smartzoom(args.input_path, args.output_path, args.margin, args.debug)

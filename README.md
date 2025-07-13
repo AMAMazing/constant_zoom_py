@@ -30,9 +30,9 @@ You must have FFmpeg installed on your system and accessible from your PATH. You
 **2. Install the Package:**
 Install `smartzoom` using pip:
 
-&&&bash
+```bash
 pip install smartzoom
-&&&
+```
 
 This will also install its Python dependencies, `opencv-python` and `numpy`.
 
@@ -42,7 +42,15 @@ This will also install its Python dependencies, `opencv-python` and `numpy`.
 
 Using the library is straightforward. Import the package and call it directly with your input and output paths.
 
-&&&python
+```python
+import smartzoom
+
+smartzoom('input_video.mp4', 'output.mp4', margin=50, debug=True)
+```
+
+or
+
+```python
 import smartzoom
 import os
 
@@ -64,36 +72,19 @@ smartzoom(
 )
 
 print(f"Processing complete! Check '{output_video}'")
-&&&
-
-### As a Command-Line Tool
-
-You can also use `smartzoom` directly from your terminal.
-
-&&&bash
-smartzoom input.mp4 output/zoomed_video.mp4 --margin 75 --debug
-&&&
-
-### Debug Mode
-
-When you set `debug=True`, the function will save two images in your output directory before it starts rendering the video:
--   `debug_raw_viewport.png`: Shows the calculated 16:9 viewport for the content with `margin=0` (red box).
--   `debug_margin_viewport.png`: Shows the final calculated 16:9 viewport with your specified `margin` (green box). This is the frame the video will end on.
-
-This is extremely useful for verifying the detection logic on a new type of video without waiting for a full render.
-
+```
 ## API Reference
 
 The package provides one primary public function.
 
-&&&python
+```python
 smartzoom(
     input_path: str,
     output_path: str,
     margin: int = 50,
     debug: bool = False
 )
-&&&
+```
 
 **Parameters:**
 
