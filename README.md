@@ -9,8 +9,7 @@ A Python utility to automatically apply a smooth, continuous zoom to a video, pe
 
 This tool solves a common problem for video creators: adding a subtle, engaging "Ken Burns" style zoom to static shots (like presentations, code tutorials, or talking-head videos) without manual editing. It intelligently detects the subject of your video, calculates the optimal framing, and renders a new high-quality video with a perfectly smooth zoom.
 
-![GIF showing a before-and-after of a slide being zoomed in]
-*(Example GIF placeholder)*
+![Demonstration of smart_constant_zoom](readme.gif)
 
 ### Key Features
 
