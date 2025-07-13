@@ -5,20 +5,25 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(
-    name='smart_constant_zoom',
+    name='smartzoom',
     version='0.1.0',
     author="Alex M",
     author_email="alexmalone489@gmail.com",
     description="A Python utility to automatically apply a smooth, continuous zoom to a video, perfectly framing its content.",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
-    url="https://github.com/AMAMazing/smart_constant_zoom",
-    keywords=["video", "zoom", "automation", "opencv", "ffmpeg"],
+    url="https://github.com/AMAMazing/smartzoom",
+    keywords=["video", "zoom", "automation", "opencv", "ffmpeg", "cli"],
     packages=find_packages(),
     install_requires=[
         'opencv-python',
         'numpy',
     ],
+    entry_points={
+        'console_scripts': [
+            'smartzoom=smartzoom.main:cli',
+        ],
+    },
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

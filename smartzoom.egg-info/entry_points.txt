@@ -1,0 +1,2 @@
+[console_scripts]
+smartzoom = smartzoom.main:cli

@@ -1,0 +1,11 @@
+LICENSE
+README.md
+setup.py
+smartzoom/__init__.py
+smartzoom/main.py
+smartzoom.egg-info/PKG-INFO
+smartzoom.egg-info/SOURCES.txt
+smartzoom.egg-info/dependency_links.txt
+smartzoom.egg-info/entry_points.txt
+smartzoom.egg-info/requires.txt
+smartzoom.egg-info/top_level.txt
